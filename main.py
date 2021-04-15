@@ -20,16 +20,16 @@ class NodParcurgere:
 
     def afisDrum(self, afisCost=False, afisLung=False):  # returneaza si lungimea drumului
         l = self.obtineDrum()
-        f = open('output.txt', 'a')
-
+        f = open(sys.argv[2], 'a')
+        
+        i = 1 #numarul de ordine al fiecarui nod in drum
         for nod in l:
-            #print(str(nod))
+            f.write(str(i) + ")\n")
+            i += 1
             f.write(str(nod) + "\n")
         if afisCost:
-            #print("Cost: ", self.g)
             f.writelines("Cost: " + str(self.g) + "\n")
         if afisCost:
-            #print("Lungime: ", len(l))
             f.writelines("Lungime: " + str(len(l)) + "\n")
         f.close()
         return len(l)
@@ -87,10 +87,14 @@ class Graph:  # graful problemei
         #print("Stare Initiala: ", self.start)
 
     def verificareValiditateInput(self):
+        nrCulori = 0
         nrTotal = 0
         for i in self.start:
             nrTotal += len(i)
-        if(nrTotal < len(self.start)):
+            for j in i:
+                if j[1] == self.culoareScop:
+                    nrCulori += 1
+        if((nrTotal < len(self.start)) or (nrCulori < 2 and len(self.start) > 1)):
             return False
         else:
             return True
@@ -200,7 +204,7 @@ def breadth_first(gr, nrSolutiiCautate):
 
         if gr.testeaza_scop(nodCurent):
             nodCurent.afisDrum(afisCost=True, afisLung=True)
-            f = open('output.txt', 'a')
+            f = open(sys.argv[2], 'a')
             f.write("\n#########################################\n")
             f.close()
             nrSolutiiCautate -= 1
@@ -218,10 +222,10 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
         nodCurent = c.pop(0)
 
         if gr.testeaza_scop(nodCurent):
-            print("Solutie: ")
             nodCurent.afisDrum(afisCost=True, afisLung=True)
-            print("\n#########################################\n")
-            input()
+            f = open(sys.argv[2], 'a')
+            f.write("\n#########################################\n")
+            f.close()
             nrSolutiiCautate -= 1
             if nrSolutiiCautate == 0:
                 return
@@ -233,35 +237,34 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
                 # diferenta fata de UCS e ca ordonez dupa f
                 if c[i].f >= s.f:
                     gasit_loc = True
-                    break;
+                    break
             if gasit_loc:
                 c.insert(i, s)
             else:
                 c.append(s)
 
-if(len(sys.argv) == 1):
-    gr = Graph("input.txt")
-else:
-    gr = Graph(sys.argv[1]) #primul parametru este fisierul de input
-#al doilea este fisierul de output
-#nr solutii
-#timeout
+
+if(len(sys.argv) < 2):
+    sys.argv.append('input.txt') #daca nu a fost dat fiesier de input
+if(len(sys.argv) < 3):
+    sys.argv.append('output.txt')   #daca nu a fost dat fisier de output
+if(len(sys.argv) < 4):
+    sys.argv.append(1)   #daca nu a fost dat numar de solutii
+if(len(sys.argv) < 5):
+    sys.argv.append(0)   #daca nu a fost dat timeout
+
+gr = Graph(sys.argv[1])
 
 #daca inputul este bun
 if(gr.verificareValiditateInput()):
     #reseteaza fisierul de output
-    f = open('output.txt', 'w')
+    f = open(sys.argv[2], 'w')
     f.close()
 
-    #Rezolvat cu breadth first
-    #print("Solutii obtinute cu breadth first:")
-    breadth_first(gr, nrSolutiiCautate=3)
+    #breadth_first(gr, nrSolutiiCautate=3)
 
-    #print("\n\n##################\nSolutii obtinute cu A*:")
-    #print("\nObservatie: stivele sunt afisate pe orizontala, cu baza la stanga si varful la dreapta.")
-    #nrSolutiiCautate=3
-    #a_star(gr, nrSolutiiCautate=3,tip_euristica="euristica nebanala")
+    #a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
 else:
-    f = open('output.txt', 'w')
+    f = open(sys.argv[2], 'w')
     f.write('Inputul este gresit')
     f.close()
