@@ -48,8 +48,6 @@ class NodParcurgere:
         sir += str(self.info)
         return (sir)
 
-    # euristica banală: daca nu e stare scop, returnez 1, altfel 0
-
     def __str__(self):
         sir = ""
 
@@ -57,7 +55,7 @@ class NodParcurgere:
         for inalt in range(maxInalt, 0, -1):
             for stiva in self.info:
                 if len(stiva) < inalt:
-                    sir += "  "
+                    sir += "   "
                 else:
                     sir += stiva[inalt - 1][0] +'[' + stiva[inalt - 1][1] + "] "
             sir += "\n"
@@ -77,7 +75,6 @@ class Graph:  # graful problemei
                 lTemp = []
                 for j in i:
                     lTemp.append(j.split(" "))
-                    #print(lT)
                 lFin.append(lTemp)
             return lFin
 
@@ -155,6 +152,11 @@ class Graph:  # graful problemei
                 costMutareBloc = int(bloc[0]) + int(len(copie_interm[idx]))        ########cost  bloc[0] + len(idx)
 
                 #schimba culoarea de dedesubt daca***** pentru stive_n[j-1] daca stive_n[j-2] are aceeasi culoare cu cea a blocului adaugat
+                if(len(stive_n[j]) >= 3):
+                    if(stive_n[j][-3][1] == stive_n[j][-1][1]):
+                        #print(stive_n[j][-3][1] + ' + mijloc: ' + stive_n[j][-2][1] + ' : +' + stive_n[j][-1][1])
+                        stive_n[j][-2][1] = stive_n[j][-1][1]
+
 
                 nod_nou = NodParcurgere(stive_n, nodCurent, cost=nodCurent.g + costMutareBloc,
                                         h=self.calculeaza_h(stive_n, tip_euristica))
