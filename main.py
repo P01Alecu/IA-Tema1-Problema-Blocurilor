@@ -4,10 +4,11 @@ import time
 
 # informatii despre un nod din arborele de parcurgere (nu din graful initial)
 class NodParcurgere:
-    def __init__(self, info, parinte, cost=0, h=0):
+    def __init__(self, info, parinte, cost=0, h=0, timp=0):
         self.info = info
         self.parinte = parinte  # parintele din arborele de parcurgere
         self.g = cost  # consider cost=1 pentru o mutare
+        self.timp = timp
         self.h = h
         self.f = self.g + self.h
 
@@ -19,19 +20,27 @@ class NodParcurgere:
             nod = nod.parinte
         return l
 
-    def afisDrum(self, afisCost=False, afisLung=False):  # returneaza si lungimea drumului
+    def afisDrum(self, afisCost=False, afisLung=False, afisTimp=False):  # returneaza si lungimea drumului
         l = self.obtineDrum()
         f = open(sys.argv[2], 'a')
         
         i = 1 #numarul de ordine al fiecarui nod in drum
+        t1 = 0
+        t2 = 0
         for nod in l:
             f.write(str(i) + ")\n")
+            if afisTimp and i==1:
+                t1 = nod.timp
+            if afisTimp and i==len(l)-1:
+                t2 = nod.timp
             i += 1
             f.write(str(nod) + "\n")
         if afisCost:
             f.writelines("Cost: " + str(self.g) + "\n")
-        if afisCost:
+        if afisLung:
             f.writelines("Lungime: " + str(len(l)) + "\n")
+        if afisTimp:
+            f.writelines("Timp: " + str(t2 - t1) + " secunde.\n")
         f.close()
         return len(l)
 
@@ -164,9 +173,8 @@ class Graph:  # graful problemei
                         #print(stive_n[j][-3][1] + ' + mijloc: ' + stive_n[j][-2][1] + ' : +' + stive_n[j][-1][1])
                         stive_n[j][-2][1] = stive_n[j][-1][1]
 
-
                 nod_nou = NodParcurgere(stive_n, nodCurent, cost=nodCurent.g + costMutareBloc,
-                                        h=self.calculeaza_h(stive_n, tip_euristica))
+                                        h=self.calculeaza_h(stive_n, tip_euristica), timp=time.time())
                 if not nodCurent.contineInDrum(stive_n):
                     listaSuccesori.append(nod_nou)
 
@@ -200,7 +208,7 @@ class Graph:  # graful problemei
 
 def breadth_first(gr, nrSolutiiCautate):
     # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
-    c = [NodParcurgere(gr.start, None)]
+    c = [NodParcurgere(gr.start, None, timp=time.time())]
     max = 0
 
     while len(c) > 0:
@@ -209,7 +217,7 @@ def breadth_first(gr, nrSolutiiCautate):
         nodCurent = c.pop(0)
 
         if gr.testeaza_scop(nodCurent):
-            nodCurent.afisDrum(afisCost=True, afisLung=True)
+            nodCurent.afisDrum(afisCost=True, afisLung=True, afisTimp=True)
             f = open(sys.argv[2], 'a')
             f.write("\n#########################################\n")
             f.close()
@@ -225,7 +233,7 @@ def breadth_first(gr, nrSolutiiCautate):
 
 def a_star(gr, nrSolutiiCautate, tip_euristica):
     # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
-    c = [NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
+    c = [NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start), timp=time.time())]
     max = 0
     
     while len(c) > 0:
@@ -233,7 +241,7 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
             max = len(c)
         nodCurent = c.pop(0)
         if gr.testeaza_scop(nodCurent):
-            nodCurent.afisDrum(afisCost=True, afisLung=True)
+            nodCurent.afisDrum(afisCost=True, afisLung=True, afisTimp=True)
             f = open(sys.argv[2], 'a')
             f.write("\n#########################################\n")
             f.close()
@@ -259,7 +267,7 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
 
 def uniform_cost(gr, nrSolutiiCautate=1):
 	#in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
-	c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
+	c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start), timp=time.time())]
 	max = 0
 	while len(c)>0:
 		#print("Coada actuala: " + str(len(c)))
@@ -268,7 +276,7 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 		nodCurent=c.pop(0)
 		
 		if gr.testeaza_scop(nodCurent):
-			nodCurent.afisDrum(afisCost=True, afisLung=True)
+			nodCurent.afisDrum(afisCost=True, afisLung=True, afisTimp=True)
 			nrSolutiiCautate-=1
 			if nrSolutiiCautate==0:
 			    f = open(sys.argv[2], 'a')
@@ -309,9 +317,9 @@ if(gr.verificareValiditateInput()):
     f = open(sys.argv[2], 'w')
     f.close()
 
-    #breadth_first(gr, nrSolutiiCautate=3)
-    #a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
-    uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
+    #breadth_first(gr, nrSolutiiCautate=int(sys.argv[3]))
+    a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
+    #uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
     
     t2 = time.time()
     print(str(t2-t1) + " secunde. (timpul total de rulare)")
