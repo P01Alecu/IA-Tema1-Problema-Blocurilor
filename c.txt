@@ -1,0 +1,7 @@
+4 3 5 vest est
+
+N=4
+M=3
+NF=5
+MalInitial=vest
+MalFinal=est
