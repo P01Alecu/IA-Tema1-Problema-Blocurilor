@@ -1,6 +1,7 @@
 import copy
 import sys
 import time
+from multiprocessing import Process #pentru timeout
 
 # informatii despre un nod din arborele de parcurgere (nu din graful initial)
 class NodParcurgere:
@@ -298,32 +299,43 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 			else:
 				c.append(s)
 
+if __name__ == '__main__':
+    if(len(sys.argv) < 2):
+        sys.argv.append('input.txt') #daca nu a fost dat fiesier de input
+    if(len(sys.argv) < 3):
+        sys.argv.append('output.txt')   #daca nu a fost dat fisier de output
+    if(len(sys.argv) < 4):
+        sys.argv.append(1)   #daca nu a fost dat numar de solutii
+    if(len(sys.argv) < 5):
+        sys.argv.append(3)   #daca nu a fost dat timeout
 
-if(len(sys.argv) < 2):
-    sys.argv.append('input.txt') #daca nu a fost dat fiesier de input
-if(len(sys.argv) < 3):
-    sys.argv.append('output.txt')   #daca nu a fost dat fisier de output
-if(len(sys.argv) < 4):
-    sys.argv.append(1)   #daca nu a fost dat numar de solutii
-if(len(sys.argv) < 5):
-    sys.argv.append(0)   #daca nu a fost dat timeout
+    t1 = time.time()
+    gr = Graph(sys.argv[1])
 
-t1 = time.time()
-gr = Graph(sys.argv[1])
+    #daca inputul este bun
+    if(gr.verificareValiditateInput()):
+        #reseteaza fisierul de output
+        f = open(sys.argv[2], 'w')
+        f.close()
 
-#daca inputul este bun
-if(gr.verificareValiditateInput()):
-    #reseteaza fisierul de output
-    f = open(sys.argv[2], 'w')
-    f.close()
+        #p = Process(target=breadth_first, args=(gr, int(sys.argv[3]), ))
+        #p = Process(target=a_star, args=(gr, int(sys.argv[3]), "euristica nebanala", ))
+        p = Process(target=uniform_cost, args=(gr, int(sys.argv[3]), ))
+        p.start()
+        p.join(timeout=int(sys.argv[4]))
+        p.terminate()
+        if p.exitcode is None:
+            print('Timeout!!!')
+            f = open(sys.argv[2], 'a')
+            f.write("\nTimeout\n")
+            f.close()
 
-    #breadth_first(gr, nrSolutiiCautate=int(sys.argv[3]))
-    a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
-    #uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
-    
-    t2 = time.time()
-    print(str(t2-t1) + " secunde. (timpul total de rulare)")
-else:
-    f = open(sys.argv[2], 'w')
-    f.write('Inputul este gresit')
-    f.close()
+        ###breadth_first(gr, nrSolutiiCautate=int(sys.argv[3]))
+        ###a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
+        ###uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
+        t2 = time.time()
+        print(str(t2-t1) + " secunde. (timpul total de rulare)")
+    else:
+        f = open(sys.argv[2], 'w')
+        f.write('Inputul este gresit')
+        f.close()

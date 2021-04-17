@@ -1,4 +1,4 @@
-Pentru rulare se se poate apela simplu py main.py, caz in care se vor folosi ca fisier de intrare 'input.txt', fiesier de iesire 'output.txt', se va genera 1 solutie si nu vom avea parametru pentru timeout,
+Pentru rulare se se poate apela simplu py main.py, caz in care se vor folosi ca fisier de intrare 'input.txt', fiesier de iesire 'output.txt', se va genera 1 solutie, iar valoarea timeout va fi de 5 secunde,
 sau le putem preciza in aceasta ordine (fisierInput fisierOutput nSolutii timeout).
 
 Exemple de apelare:
