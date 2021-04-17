@@ -1,5 +1,6 @@
 import copy
 import sys
+import time
 
 # informatii despre un nod din arborele de parcurgere (nu din graful initial)
 class NodParcurgere:
@@ -200,8 +201,11 @@ class Graph:  # graful problemei
 def breadth_first(gr, nrSolutiiCautate):
     # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
     c = [NodParcurgere(gr.start, None)]
+    max = 0
 
     while len(c) > 0:
+        if(max < len(c)):
+            max = len(c)
         nodCurent = c.pop(0)
 
         if gr.testeaza_scop(nodCurent):
@@ -211,6 +215,9 @@ def breadth_first(gr, nrSolutiiCautate):
             f.close()
             nrSolutiiCautate -= 1
             if nrSolutiiCautate == 0:
+                f = open(sys.argv[2], 'a')
+                f.write("\nNumarul total de noduri calculate: " + str(max) + "\n")
+                f.close()
                 return
         lSuccesori = gr.genereazaSuccesori(nodCurent)
         c.extend(lSuccesori)
@@ -219,10 +226,12 @@ def breadth_first(gr, nrSolutiiCautate):
 def a_star(gr, nrSolutiiCautate, tip_euristica):
     # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
     c = [NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
-
+    max = 0
+    
     while len(c) > 0:
+        if max < len(c):
+            max = len(c)
         nodCurent = c.pop(0)
-
         if gr.testeaza_scop(nodCurent):
             nodCurent.afisDrum(afisCost=True, afisLung=True)
             f = open(sys.argv[2], 'a')
@@ -230,6 +239,9 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
             f.close()
             nrSolutiiCautate -= 1
             if nrSolutiiCautate == 0:
+                f = open(sys.argv[2], 'a')
+                f.write("\nNumarul total de noduri calculate: " + str(max) + "\n")
+                f.close()
                 return
         lSuccesori = gr.genereazaSuccesori(nodCurent, tip_euristica=tip_euristica)
         for s in lSuccesori:
@@ -248,16 +260,22 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
 def uniform_cost(gr, nrSolutiiCautate=1):
 	#in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
 	c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
-	
+	max = 0
 	while len(c)>0:
 		#print("Coada actuala: " + str(len(c)))
+		if(max < len(c)):
+		    max = len(c)
 		nodCurent=c.pop(0)
 		
 		if gr.testeaza_scop(nodCurent):
 			nodCurent.afisDrum(afisCost=True, afisLung=True)
 			nrSolutiiCautate-=1
 			if nrSolutiiCautate==0:
-				return
+			    f = open(sys.argv[2], 'a')
+			    f.write("\nNumarul total de noduri calculate: " + str(max) + "\n")
+			    f.close()
+			    return
+				#return
 		lSuccesori=gr.genereazaSuccesori(nodCurent)	
 		for s in lSuccesori:
 			i=0
@@ -282,6 +300,7 @@ if(len(sys.argv) < 4):
 if(len(sys.argv) < 5):
     sys.argv.append(0)   #daca nu a fost dat timeout
 
+t1 = time.time()
 gr = Graph(sys.argv[1])
 
 #daca inputul este bun
@@ -293,6 +312,9 @@ if(gr.verificareValiditateInput()):
     #breadth_first(gr, nrSolutiiCautate=3)
     #a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
     uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
+    
+    t2 = time.time()
+    print(str(t2-t1) + " secunde. (timpul total de rulare)")
 else:
     f = open(sys.argv[2], 'w')
     f.write('Inputul este gresit')
