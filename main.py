@@ -87,6 +87,10 @@ class Graph:  # graful problemei
         #print("Stare Initiala: ", self.start)
 
     def verificareValiditateInput(self):
+        """
+        Verifica daca avem suficiente culori si blocuri pentru a atince scopul.
+        Trebuie sa avem cel putin 2 culori scop si cel putin cate un bloc pentru fiecare stiva
+        """
         nrCulori = 0
         nrTotal = 0
         for i in self.start:
@@ -103,13 +107,11 @@ class Graph:  # graful problemei
         esteScop = True
         for i in stareCurenta.info:
             if len(i) > 0:
-                #print(i[-1])
                 if i[-1][1] != self.culoareScop:
                     esteScop = False
                     break
             else:
                 esteScop = False
-                #print([])
                 break
         return esteScop
 
@@ -153,9 +155,9 @@ class Graph:  # graful problemei
                     continue
 
                 stive_n[j].append(bloc)
-                costMutareBloc = int(bloc[0]) + int(len(copie_interm[idx]))        ########cost  bloc[0] + len(idx)
+                costMutareBloc = int(bloc[0]) + int(len(copie_interm[idx]))
 
-                #schimba culoarea de dedesubt daca***** pentru stive_n[j-1] daca stive_n[j-2] are aceeasi culoare cu cea a blocului adaugat
+                #daca blocul de dedesubt este prins intre 2 culori identice, o va primi si acesta (de dedesubt)
                 if(len(stive_n[j]) >= 3):
                     if(stive_n[j][-3][1] == stive_n[j][-1][1]):
                         #print(stive_n[j][-3][1] + ' + mijloc: ' + stive_n[j][-2][1] + ' : +' + stive_n[j][-1][1])
@@ -243,6 +245,33 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
             else:
                 c.append(s)
 
+def uniform_cost(gr, nrSolutiiCautate=1):
+	#in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
+	c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
+	
+	while len(c)>0:
+		#print("Coada actuala: " + str(len(c)))
+		nodCurent=c.pop(0)
+		
+		if gr.testeaza_scop(nodCurent):
+			nodCurent.afisDrum(afisCost=True, afisLung=True)
+			nrSolutiiCautate-=1
+			if nrSolutiiCautate==0:
+				return
+		lSuccesori=gr.genereazaSuccesori(nodCurent)	
+		for s in lSuccesori:
+			i=0
+			gasit_loc=False
+			for i in range(len(c)):
+				#ordonez dupa cost(notat cu g aici și în desenele de pe site)
+				if c[i].g>s.g :
+					gasit_loc=True
+					break
+			if gasit_loc:
+				c.insert(i,s)
+			else:
+				c.append(s)
+
 
 if(len(sys.argv) < 2):
     sys.argv.append('input.txt') #daca nu a fost dat fiesier de input
@@ -262,8 +291,8 @@ if(gr.verificareValiditateInput()):
     f.close()
 
     #breadth_first(gr, nrSolutiiCautate=3)
-
     #a_star(gr, nrSolutiiCautate=int(sys.argv[3]),tip_euristica="euristica nebanala")
+    uniform_cost(gr, nrSolutiiCautate=int(sys.argv[3]))
 else:
     f = open(sys.argv[2], 'w')
     f.write('Inputul este gresit')

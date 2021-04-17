@@ -8,3 +8,4 @@ py main.py input.txt output.txt
 py main.py input.txt output.txt 1
 py main.py input.txt output.txt 1 10
 
+Verificare date intrare: trebuie sa avem cel putin 2 blocuri de culoarea ceruta si trebuie sa avem blocuri sa putem ocupa cel putin cate un loc in fiecare stiva (altfel vom avea o stiva vida).
