@@ -32,7 +32,7 @@ class NodParcurgere:
 				f.write(">>> Barca s-a deplasat de la malul {} la malul {} cu {} fantome, {} canibali si {} misionari.\n".format(mbarca1, mbarca2, abs(nod.info[2]-nod.parinte.info[2]),abs(nod.info[0]-nod.parinte.info[0]), abs(nod.info[1]-nod.parinte.info[1])))
 			f.write(str(i) + ") " + str(nod) + "\n")
 			i=i+1
-			print(str(nod) + "\n")
+			#print(str(nod) + "\n")
 		if afisCost:
 			f.write("\nCost: " + str(self.g) + "\n")
 		if afisCost:
@@ -211,7 +211,7 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 			else:
 				c.append(s)
 
-gr=Graph("input.txt")	
+gr=Graph("c.txt")	
 NodParcurgere.gr = gr
 
 f = open("output.txt", "w")

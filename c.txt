@@ -2,6 +2,7 @@
 
 N=4
 M=3
-NF=5
-MalInitial=vest
-MalFinal=est
+NF=3
+NFe=5
+MalInitial=start
+MalFinal=end
