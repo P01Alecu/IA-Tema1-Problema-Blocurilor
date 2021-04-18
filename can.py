@@ -20,6 +20,7 @@ class NodParcurgere:
 	def afisDrum(self, afisCost=False, afisLung=False): #returneaza si lungimea drumului
 		l=self.obtineDrum()
 		f = open('output.txt', 'a')
+		i=1
 		for nod in l:
 			if nod.parinte is not None:
 				if nod.parinte.info[3]==1:
@@ -28,8 +29,10 @@ class NodParcurgere:
 				else:
 					mbarca1=self.__class__.gr.malFinal
 					mbarca2=self.__class__.gr.malInitial
-				f.write(">>> Barca s-a deplasat de la malul {} la malul {} cu {} canibali si {} misionari.\n".format(mbarca1, mbarca2, abs(nod.info[0]-nod.parinte.info[0]), abs(nod.info[1]-nod.parinte.info[1])))
-			f.write(str(nod) + "\n")
+				f.write(">>> Barca s-a deplasat de la malul {} la malul {} cu {} fantome, {} canibali si {} misionari.\n".format(mbarca1, mbarca2, abs(nod.info[2]-nod.parinte.info[2]),abs(nod.info[0]-nod.parinte.info[0]), abs(nod.info[1]-nod.parinte.info[1])))
+			f.write(str(i) + ") " + str(nod) + "\n")
+			i=i+1
+			print(str(nod) + "\n")
 		if afisCost:
 			f.write("\nCost: " + str(self.g) + "\n")
 		if afisCost:
@@ -82,22 +85,21 @@ class Graph: #graful problemei
 		self.__class__.malInitial=listaInfoFisier[3]
 		self.__class__.malFinal=listaInfoFisier[4]
 		'''
-
-		print(self.__class__.NF)
 		self.start=(self.__class__.N,self.__class__.N,self.__class__.NF,1) #informatia nodului de start
 		#self.scopuri=[(0,0,0,0)]
 
 	def testeaza_scop(self, nodCurent):
-		if nodCurent.info[0]==0 and nodCurent.info[1]==0 and nodCurent.info[3]==0:
+		if nodCurent.info[0]==0 and nodCurent.info[1]==0 and nodCurent.info[3]==0 and nodCurent.info[2]==Graph.NF:
 			return True
 		return False
 
 	def genereazaSuccesori(self, nodCurent,tip_euristica="euristica banala"):
-		def test_conditie(mis, can):
-			return mis==0 or mis>=can
+		def test_conditie(mis, can, fan):
+			#return mis==0 or mis>=can
+			return mis==0 or mis>=can and fan<mis+can
 
 		listaSuccesori=[]
-		#nodCurent.info va contine un triplet (c_i, m_i, barca)
+		#nodCurent.info va contine (c_i, m_i, f_i, barca)
 		barca=nodCurent.info[3]
 		if barca==1:
 			canMalCurent=nodCurent.info[0]
@@ -122,24 +124,30 @@ class Graph: #graful problemei
 			else:
 				maxCanibaliBarca=min(Graph.M-misBarca, canMalCurent, misBarca)
 				minCanibaliBarca=0
+
 			for canBarca in range(minCanibaliBarca, maxCanibaliBarca+1):
+				if misBarca==0: #fantomele
+					fanBarca=min(Graph.M-canBarca, fanMalCurent, canBarca)
+				else: #daca avem misionari in barca, nu vom avea fantome
+					fanBarca=0
+
 				#consideram mal curent nou ca fiind acelasi mal de pe care a plecat barca
 				canMalCurentNou=canMalCurent-canBarca
 				misMalCurentNou=misMalCurent-misBarca
-				fanMalCurentNou=0
+				fanMalCurentNou=fanMalCurent-fanBarca
 				canMalOpusNou=canMalOpus+canBarca
 				misMalOpusNou=misMalOpus+misBarca
-				fanMalOpusNou=0
-				if not test_conditie(misMalCurentNou,canMalCurentNou ):
+				fanMalOpusNou=fanMalOpus+fanBarca
+				if not test_conditie(misMalCurentNou,canMalCurentNou,fanMalCurentNou):
 					continue
-				if not test_conditie(misMalOpusNou,canMalOpusNou ):
+				if not test_conditie(misMalOpusNou,canMalOpusNou,fanMalOpusNou):
 					continue	
 				if barca==1: #testul este pentru barca nodului curent (parinte) deci inainte de mutare
 					infoNodNou= (canMalCurentNou,misMalCurentNou,fanMalCurentNou, 0)	
 				else:				
 					infoNodNou= (canMalOpusNou,misMalOpusNou,fanMalOpusNou, 1)
 				if not nodCurent.contineInDrum(infoNodNou):
-					costSuccesor=canBarca*2+misBarca
+					costSuccesor=canBarca+misBarca-fanBarca
 					listaSuccesori.append(NodParcurgere(infoNodNou,nodCurent,cost=nodCurent.g+costSuccesor, h=1))
 
 		return listaSuccesori
@@ -174,11 +182,40 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
 			else:
 				c.append(s)
 
+def uniform_cost(gr, nrSolutiiCautate=1):
+	#c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start))]
+	c=[NodParcurgere(gr.start, None, 0, 1)]
+	
+	while len(c)>0:
+		nodCurent=c.pop(0)
+		
+		if gr.testeaza_scop(nodCurent):
+			nodCurent.afisDrum()
+			f = open("output.txt", "a")
+			f.write("==========================")
+			f.close()
+			nrSolutiiCautate-=1
+			if nrSolutiiCautate==0:
+				return
+		lSuccesori=gr.genereazaSuccesori(nodCurent)	
+		for s in lSuccesori:
+			i=0
+			gasit_loc=False
+			for i in range(len(c)):
+				#ordonez dupa cost(notat cu g aici și în desenele de pe site)
+				if c[i].g>s.g :
+					gasit_loc=True
+					break
+			if gasit_loc:
+				c.insert(i,s)
+			else:
+				c.append(s)
 
-gr=Graph("c.txt")	
+gr=Graph("input.txt")	
 NodParcurgere.gr = gr
 
 f = open("output.txt", "w")
 f.close()
 
 a_star(gr, nrSolutiiCautate=1, tip_euristica="euristica banala")
+#uniform_cost(gr, nrSolutiiCautate=1)
