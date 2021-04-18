@@ -183,6 +183,10 @@ class Graph:  # graful problemei
 
     # euristica banala
     def calculeaza_h(self, infoNod, tip_euristica="euristica banala"):
+        if tip_euristica == "euristica banala":
+            return 1
+        else:
+            return 10
         '''
         if tip_euristica == "euristica banala":
             if infoNod not in self.scopuri:
@@ -298,6 +302,39 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 				c.insert(i,s)
 			else:
 				c.append(s)
+def ida_star(gr, nrSolutiiCautate):
+	nodStart=NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, 'euristica nebanala'), timp=time.time())
+	limita=nodStart.f
+	f=open(sys.argv[2], 'a')
+	while True:
+		#print("Limita de pornire: ", limita)
+		nrSolutiiCautate, rez= construieste_drum(gr, nodStart,limita,nrSolutiiCautate)
+		if rez=="gata":
+			break
+		if rez==float('inf'):
+			f.write("\nNu exista solutii\n")
+			break
+		limita=rez
+def construieste_drum(gr, nodCurent, limita, nrSolutiiCautate):
+	if nodCurent.f>limita:
+		return nrSolutiiCautate, nodCurent.f
+	if gr.testeaza_scop(nodCurent) and nodCurent.f==limita :
+		nodCurent.afisDrum(afisCost=True, afisLung=True, afisTimp=True)
+		f = open(sys.argv[2], 'a')
+		f.write("\n========================\n")
+		f.close()
+		nrSolutiiCautate-=1
+		if nrSolutiiCautate==0:
+			return 0,"gata"
+	lSuccesori=gr.genereazaSuccesori(nodCurent)	
+	minim=float('inf')
+	for s in lSuccesori:
+		nrSolutiiCautate, rez=construieste_drum(gr, s, limita, nrSolutiiCautate)
+		if rez=="gata":
+			return 0,"gata"
+		if rez<minim:
+			minim=rez
+	return nrSolutiiCautate, minim
 
 if __name__ == '__main__':
     if(len(sys.argv) < 2):
@@ -319,8 +356,9 @@ if __name__ == '__main__':
         f.close()
 
         #p = Process(target=breadth_first, args=(gr, int(sys.argv[3]), ))
-        #p = Process(target=a_star, args=(gr, int(sys.argv[3]), "euristica nebanala", ))
-        p = Process(target=uniform_cost, args=(gr, int(sys.argv[3]), ))
+        #p = Process(target=a_star, args=(gr, int(sys.argv[3]), "euristica banala", ))
+        #p = Process(target=uniform_cost, args=(gr, int(sys.argv[3]), ))
+        p = Process(target=ida_star, args=(gr, int(sys.argv[3]), ))
         p.start()
         p.join(timeout=int(sys.argv[4]))
         p.terminate()
