@@ -4,20 +4,49 @@ dintre ultimele doua fisiere, cel putin un fisier sa dea drumul de cost minim pe
 
 
 De afisat:
-timpul de găsire a unei soluții (atenție, pentru soluțiile de la a doua încolo timpul se consideră tot de la începutul execuției algoritmului și nu de la ultima soluție)
-numărul maxim de noduri existente la un moment dat în memorie
 numărul total de noduri calculate (totalul de succesori generati; atenție la DFI și IDA* se adună pentru fiecare iteratie chiar dacă se repetă generarea arborelui, nodurile se vor contoriza de fiecare dată afișându-se totalul pe toate iterațiile
 
 
 Problema se va rula cu algoritmii: UCS, A* (varianta care dă toate drumurile), A* optimizat (cu listele open și closed, care dă doar drumul de cost minim), IDA*.
 
 
-
-
-
 Euristica:
-Căutăm idei de euristici. Pentru a găsi euristici, luăm câteva exemple de stări nefinale și câteva exemple de stări finale și le observăm. Ne punem întrebarile:
+Pentru a găsi euristici, luăm câteva exemple de stări nefinale și câteva exemple de stări finale și le observăm. Ne punem întrebarile:
     Ce elemente se schimbă pentru a ajunge într-o stare finală ?
     Câte elemente se schimbă? (în special când avem colecții de elemente: vectori sau matrici)
     Schimbarea unui element influențează schimbarea altor elemente? Dacă da, atunci trebuie să împărțim euristica la câte elemente se schimbă, deoarece dacă o mutare schimbă de exemplu 2 elemente dar o numărăm pentru fiecare element, ne iese o estimare mai mare decât costul real (neadmisibilă)
-    În câți pași se schimbăun element șî de ce factori depinde? Pentru această întrebare putem încerca simplificări ale contextului, dar de care știm sigur că nu măresc numărul de pași ci doar eventual îl micșorează. De exemplu dacă vrem să vedem în câte mutări e parcursă o hartă reprezentată printr-o matrice, în care sunt și obstacole (celule în care nu putem intra). O simplificare bună e ignorarea obstacolelor (un obstacol înseamnă un ocol, deci mai mulți pași, astfel, ignorarea lor, nu poate decât să scadă numărul de pași estimat).
+    În câți pași se schimbă un element șî de ce factori depinde? Pentru această întrebare putem încerca simplificări ale contextului, dar de care știm sigur că nu măresc numărul de pași ci doar eventual îl micșorează. De exemplu dacă vrem să vedem în câte mutări e parcursă o hartă reprezentată printr-o matrice, în care sunt și obstacole (celule în care nu putem intra). O simplificare bună e ignorarea obstacolelor (un obstacol înseamnă un ocol, deci mai mulți pași, astfel, ignorarea lor, nu poate decât să scadă numărul de pași estimat).
+
+
+    
+
+
+
+
+
+    euristica banala: min 23.15
+Daca costul minim pe un arc este 1, pot sa consider asa euristica banala:
+
+Nodurile scop au estimare 0,  nodurile nescop au estimare 1(trebuie facuta cel putin o mutare)
+
+o euristica nebanala, admisibila(min27):
+
+Numar cate blocuri nu sunt la locul lor si pot sa le consider costul lor de mutare egal cu 1, deci se aduna 1 pentru fiecare bloc mutat
+
+Var2- blocul A cost1, blocul B cost 2, C cost 3,etc...=> 1+2+3 (le atribuie indecsi)
+
+
+O euristica si mai buna(min 29):
+  Nu ignor orice bloc care este la locul lui, ci doar pe cele care nu au sub ele in stiva blocuri care trebuie mutate; pentru un asemenea bloc, care e la locul lui, dar trebuie mutat ca sa eliberez alte blocuri, adun 2(il mut de pe stiva si mai apoi il pun la loc)
+
+
+
+Alta varianta mai buna:
+
+Daca un bloc trebuie sa 
+plece de pe stiva si sa se intoarca(ori ca nu e la locul lui(se afla intr o inversiune pe stiva), ori ca avem sub el elemente de mutat), pentru el adun 2, pentru ca mutarea lui e independenta fata de alte blocuri
+
+
+Min 46.53-implementarea euristicii banale si a unei euristici nebanale prezentate mai sus
+
+https://www.youtube.com/watch?v=MmzBJj5sMKU&list=PL9kCt-OPgVyeclPEG7oqcKOmQVIR93X3O&index=7

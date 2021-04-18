@@ -1,3 +1,6 @@
+'''
+Documentatie: https://docs.google.com/document/d/1ZUyqkFChdxvniIWOeMFsLlHfhXCt4lEWL9-Af9beiBo/edit?usp=sharing
+'''
 import copy
 import sys
 import time
@@ -184,15 +187,36 @@ class Graph:  # graful problemei
     # euristica banala
     def calculeaza_h(self, infoNod, tip_euristica="euristica banala"):
         if tip_euristica == "euristica banala":
-            return 1
-        else:
-            return 10
-        '''
-        if tip_euristica == "euristica banala":
-            if infoNod not in self.scopuri:
-                return 1
+            for i in infoNod:
+                if len(i) != 0:
+                    if i[-1][1] != self.culoareScop:
+                        return 1
+                else:
+                    return 1
             return 0
-        else:
+
+        elif tip_euristica == "euristica nebanala1":
+            indexMinim = 1
+            mutariMinime = 0
+            for i in infoNod:
+                if len(i) != 0:
+                    #if i[-1][1] != self.culoareScop:
+                    mutariMinime += 1
+                    if indexMinim > int(i[-1][0]):
+                        indexMinim = int(i[-1][0])
+                else:
+                    mutariMinime += 1
+            return indexMinim * mutariMinime
+
+        elif tip_euristica == "euristica neadmisibila":
+            cost = 0
+            for i in infoNod:
+                if len(i) != 0:
+                    if i[-1][1] != self.culoareScop:
+                        cost += int(i[-1][0]) + len(i)
+            return cost
+        return 10
+        '''
             # calculez cate blocuri nu sunt la locul fata de fiecare dintre starile scop, si apoi iau minimul dintre aceste valori
             euristici = []
             for (iScop, scop) in enumerate(self.scopuri):
@@ -275,7 +299,6 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 	c=[NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start), timp=time.time())]
 	max = 0
 	while len(c)>0:
-		#print("Coada actuala: " + str(len(c)))
 		if(max < len(c)):
 		    max = len(c)
 		nodCurent=c.pop(0)
@@ -302,20 +325,21 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 				c.insert(i,s)
 			else:
 				c.append(s)
-def ida_star(gr, nrSolutiiCautate):
-	nodStart=NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, 'euristica nebanala'), timp=time.time())
+
+def ida_star(gr, nrSolutiiCautate, tip_euristica="euristica banala"):
+	nodStart=NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, tip_euristica), timp=time.time())
 	limita=nodStart.f
 	f=open(sys.argv[2], 'a')
 	while True:
 		#print("Limita de pornire: ", limita)
-		nrSolutiiCautate, rez= construieste_drum(gr, nodStart,limita,nrSolutiiCautate)
+		nrSolutiiCautate, rez= construieste_drum(gr, nodStart,limita,nrSolutiiCautate, tip_euristica)
 		if rez=="gata":
 			break
 		if rez==float('inf'):
 			f.write("\nNu exista solutii\n")
 			break
 		limita=rez
-def construieste_drum(gr, nodCurent, limita, nrSolutiiCautate):
+def construieste_drum(gr, nodCurent, limita, nrSolutiiCautate, tip_euristica):
 	if nodCurent.f>limita:
 		return nrSolutiiCautate, nodCurent.f
 	if gr.testeaza_scop(nodCurent) and nodCurent.f==limita :
@@ -329,7 +353,7 @@ def construieste_drum(gr, nodCurent, limita, nrSolutiiCautate):
 	lSuccesori=gr.genereazaSuccesori(nodCurent)	
 	minim=float('inf')
 	for s in lSuccesori:
-		nrSolutiiCautate, rez=construieste_drum(gr, s, limita, nrSolutiiCautate)
+		nrSolutiiCautate, rez=construieste_drum(gr, s, limita, nrSolutiiCautate, tip_euristica)
 		if rez=="gata":
 			return 0,"gata"
 		if rez<minim:
@@ -356,9 +380,9 @@ if __name__ == '__main__':
         f.close()
 
         #p = Process(target=breadth_first, args=(gr, int(sys.argv[3]), ))
-        #p = Process(target=a_star, args=(gr, int(sys.argv[3]), "euristica banala", ))
+        p = Process(target=a_star, args=(gr, int(sys.argv[3]), "euristica nebanala1", ))
         #p = Process(target=uniform_cost, args=(gr, int(sys.argv[3]), ))
-        p = Process(target=ida_star, args=(gr, int(sys.argv[3]), ))
+        #p = Process(target=ida_star, args=(gr, int(sys.argv[3]), "euristica nebanala1", ))
         p.start()
         p.join(timeout=int(sys.argv[4]))
         p.terminate()
