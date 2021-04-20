@@ -19,7 +19,10 @@ class NodParcurgere:
 
 	def afisDrum(self, afisCost=False, afisLung=False): #returneaza si lungimea drumului
 		l=self.obtineDrum()
-		f = open('output.txt', 'a')
+		if len(sys.argv) > 2:
+			f = open(sys.argv[2], 'a')
+		else:
+			f = open('output.txt', 'a')
 		i=1
 		for nod in l:
 			if nod.parinte is not None:
@@ -162,7 +165,10 @@ def a_star(gr, nrSolutiiCautate, tip_euristica):
 		
 		if gr.testeaza_scop(nodCurent):
 			nodCurent.afisDrum(afisCost=True, afisLung=True)
-			f = open("output.txt", "a")
+			if len(sys.argv) > 2:
+				f = open(sys.argv[2], "a")
+			else:
+				f = open("output.txt", "a")
 			f.write("==========================")
 			f.close()
 			nrSolutiiCautate-=1
@@ -191,7 +197,10 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 		
 		if gr.testeaza_scop(nodCurent):
 			nodCurent.afisDrum()
-			f = open("output.txt", "a")
+			if len(sys.argv) > 2:
+				f = open(sys.argv[2], "a")
+			else:
+				f = open("output.txt", "a")
 			f.write("==========================")
 			f.close()
 			nrSolutiiCautate-=1
@@ -211,11 +220,21 @@ def uniform_cost(gr, nrSolutiiCautate=1):
 			else:
 				c.append(s)
 
-gr=Graph("c.txt")	
-NodParcurgere.gr = gr
+if len(sys.argv) > 1:
+	gr=Graph(sys.argv[1])	
+else:
+	gr=Graph('c.txt')	
 
-f = open("output.txt", "w")
+NodParcurgere.gr = gr
+if len(sys.argv) > 2:
+	f = open(sys.argv[2], "w")
+else:
+	f = open("output.txt", "w")
 f.close()
 
-a_star(gr, nrSolutiiCautate=1, tip_euristica="euristica banala")
-#uniform_cost(gr, nrSolutiiCautate=1)
+if len(sys.argv) > 3:
+	nSol = int(sys.argv[3])
+else:
+	nSol = 2
+a_star(gr, nrSolutiiCautate=nSol, tip_euristica="euristica banala")
+#uniform_cost(gr, nrSolutiiCautate=nSol)

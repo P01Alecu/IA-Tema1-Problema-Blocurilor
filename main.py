@@ -215,24 +215,6 @@ class Graph:  # graful problemei
                     if i[-1][1] != self.culoareScop:
                         cost += int(i[-1][0]) + len(i)
             return cost
-        return 10
-        '''
-            # calculez cate blocuri nu sunt la locul fata de fiecare dintre starile scop, si apoi iau minimul dintre aceste valori
-            euristici = []
-            for (iScop, scop) in enumerate(self.scopuri):
-                h = 0
-                for iStiva, stiva in enumerate(infoNod):
-                    for iElem, elem in enumerate(stiva):
-                        try:
-                            # exista în stiva scop indicele iElem dar pe acea pozitie nu se afla blocul din infoNod
-                            if elem != scop[iStiva][iElem]:
-                                h += 1
-                        except IndexError:
-                            # nici macar nu exista pozitia iElem in stiva cu indicele iStiva din scop
-                            h += 1
-                euristici.append(h)
-            return min(euristici)
-        '''
         return 1
 
 def breadth_first(gr, nrSolutiiCautate):
